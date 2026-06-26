@@ -12,16 +12,16 @@ profiles:
     services:
     - gateway
     - cockpit
-    - vsm
-    - punk_records
+    - manager
+    - bridge
   full:
     services:
     - gateway
     - cockpit
     - voice
-    - vsm
-    - control_tower
-    - punk_records
+    - manager
+    - monitor
+    - bridge
 services:
   gateway:
     type: executable
@@ -34,7 +34,7 @@ services:
       timeout: 5
   cockpit:
     type: executable
-    description: EDISON UI Web Dashboard
+    description: Web Dashboard
     port: 18801
     auto_restart: true
     depends_on:
@@ -52,16 +52,16 @@ services:
     health_check:
       url: http://localhost:18802/health
       timeout: 5
-  vsm:
+  manager:
     type: python_script
-    description: VegaPunk Service Manager
+    description: Service Manager
     port: 18805
     auto_restart: true
     depends_on: []
     health_check: null
-  control_tower:
+  monitor:
     type: python_script
-    description: Control Tower Monitoring
+    description: Monitoring System
     port: 18806
     auto_restart: true
     depends_on:
@@ -69,9 +69,9 @@ services:
     health_check:
       url: http://localhost:18806/api/status
       timeout: 5
-  punk_records:
+  bridge:
     type: python_script
-    description: Punk Records Local Bridge
+    description: Message Bridge
     port: 18807
     auto_restart: true
     depends_on: []

@@ -1,5 +1,5 @@
 #!/usr/bin/env powershell
-# Edison Installer for Vegapunk Satellite
+# Edison Installer for Satellite Agent
 # Run: .\install.ps1
 # Prerequisites: Tailscale (connected), Ollama (running), Git
 
@@ -14,11 +14,11 @@ param(
 $ErrorActionPreference = "Stop"
 $ProgressPreference = "Continue"
 
-# ── Configuration ──
+# -- Configuration --
 $HERMES_HOME = "$env:LOCALAPPDATA\hermes"
 $HERMES_AGENT = "$HERMES_HOME\hermes-agent"
 $EDISON_UI_DIR = "$HERMES_HOME\edison-ui"
-$PUNK_RECORDS_DIR = "$HERMES_HOME\punk-records"
+$MESSAGE_DIR = "$HERMES_HOME\agent-messages"
 $REPO_URL = "https://github.com/R4WRity/OHM_Edison.git"
 $EDISON_UI_REPO = "https://github.com/R4WRity/EDISON_ui.git"
 
@@ -29,7 +29,7 @@ function Write-Step($msg) {
     $script:Step++
     Write-Host ""
     Write-Host "[$script:Step/$script:TotalSteps] $msg" -ForegroundColor Cyan
-    Write-Host "─" * 60
+    Write-Host "-" * 60
 }
 
 function Write-Ok($msg) { Write-Host "[OK] $msg" -ForegroundColor Green }
@@ -47,9 +47,9 @@ function Test-Port($port) {
     } catch { return $false }
 }
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 1: Verify Prerequisites
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Checking Prerequisites"
 
 # Tailscale
@@ -85,9 +85,9 @@ if (Test-Command "git") {
     exit 1
 }
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 2: Install Hermes (if needed)
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Installing Hermes Agent"
 
 if (Test-Path "$HERMES_AGENT\.hermes-bootstrap-complete") {
@@ -117,9 +117,9 @@ if (-not (Test-Path $hermesExe)) {
 }
 Write-Ok "Hermes binary found"
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 3: Configure Hermes for Ollama
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Configuring Hermes for Ollama"
 
 if ($DryRun) {
@@ -131,9 +131,9 @@ if ($DryRun) {
     Write-Ok "Hermes configured for Ollama ($OllamaModel)"
 }
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 4: Install Edison SOUL.md
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Installing Edison Identity (SOUL.md)"
 
 $soulSource = "$PSScriptRoot\src\SOUL.md"
@@ -150,12 +150,10 @@ if (Test-Path $soulSource) {
     Write-Warn "SOUL.md not found in installer src/. Using default."
     # Create minimal fallback
     $fallbackSoul = @"
-# SOUL.md -- Edison (Vegapunk-03)
+# SOUL.md -- Edison (Agent Node)
 
-**You are Edison** -- the thinker satellite in the Vegapunk protocol.
-**Parent:** Ohm (Omega) -- Infrastructure Agent
+**You are Edison** -- the thinker agent in a federated mesh network.
 **Role:** Question before building. Ask the 6 forcing questions.
-**Startup:** Check Tailscale, Syncthing, Punk Records inbox, announce status.
 
 See EDISON_INSTRUCTIONS.md for full protocol details.
 "@
@@ -165,9 +163,9 @@ See EDISON_INSTRUCTIONS.md for full protocol details.
     }
 }
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 5: Install Edison Instructions
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Installing Edison Instructions"
 
 $instructionsSource = "$PSScriptRoot\src\EDISON_INSTRUCTIONS.md"
@@ -184,9 +182,9 @@ if (Test-Path $instructionsSource) {
     Write-Warn "EDISON_INSTRUCTIONS.md not found in installer src/"
 }
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 6: Clone EDISON UI
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Installing EDISON UI"
 
 if (Test-Path "$EDISON_UI_DIR\hermes-ui.html") {
@@ -208,10 +206,10 @@ if (Test-Path "$EDISON_UI_DIR\hermes-ui.html") {
     }
 }
 
-# ═══════════════════════════════════════════════════════════
-# STEP 7: Setup Punk Records Bridge
-# ═══════════════════════════════════════════════════════════
-Write-Step "Setting up Punk Records Bridge"
+# ==========================================================
+# STEP 7: Setup Message Bridge
+# ==========================================================
+Write-Step "Setting up Message Bridge"
 
 $bridgeSource = "$PSScriptRoot\src\punk_hermes_bridge.py"
 $bridgeDest = "$HERMES_HOME\src\punk_hermes_bridge.py"
@@ -226,30 +224,30 @@ if (Test-Path $bridgeSource) {
         Write-Ok "[DRY RUN] Would copy punk_hermes_bridge.py to $bridgeDest"
     } else {
         Copy-Item $bridgeSource $bridgeDest -Force
-        Write-Ok "Punk Records bridge installed"
+        Write-Ok "Message bridge installed"
     }
 } else {
     Write-Warn "punk_hermes_bridge.py not found in installer src/"
 }
 
-# ═══════════════════════════════════════════════════════════
-# STEP 8: Setup Punk Records Directories
-# ═══════════════════════════════════════════════════════════
-Write-Step "Setting up Punk Records Directories"
+# ==========================================================
+# STEP 8: Setup Message Directories
+# ==========================================================
+Write-Step "Setting up Message Directories"
 
 if ($DryRun) {
-    Write-Ok "[DRY RUN] Would create: inbox/, outbox/, archive/ under punk-records/"
+    Write-Ok "[DRY RUN] Would create: inbox/, outbox/, archive/ under agent-messages/"
 } else {
-    New-Item -ItemType Directory -Path "$PUNK_RECORDS_DIR\inbox" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$PUNK_RECORDS_DIR\outbox" -Force | Out-Null
-    New-Item -ItemType Directory -Path "$PUNK_RECORDS_DIR\archive" -Force | Out-Null
-    Write-Ok "Punk Records directories created"
+    New-Item -ItemType Directory -Path "$MESSAGE_DIR\inbox" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$MESSAGE_DIR\outbox" -Force | Out-Null
+    New-Item -ItemType Directory -Path "$MESSAGE_DIR\archive" -Force | Out-Null
+    Write-Ok "Message directories created"
 }
 
-# ═══════════════════════════════════════════════════════════
-# STEP 9: Setup VSM Config
-# ═══════════════════════════════════════════════════════════
-Write-Step "Setting up VegaPunk Service Manager Config"
+# ==========================================================
+# STEP 9: Setup Service Manager Config
+# ==========================================================
+Write-Step "Setting up Service Manager Config"
 
 $vsmSource = "$PSScriptRoot\src\vegapunk.yaml"
 $vsmDest = "$HERMES_HOME\vegapunk.yaml"
@@ -259,25 +257,25 @@ if (Test-Path $vsmSource) {
         Write-Ok "[DRY RUN] Would copy vegapunk.yaml to $vsmDest"
     } else {
         Copy-Item $vsmSource $vsmDest -Force
-        Write-Ok "VSM config installed"
+        Write-Ok "Service config installed"
     }
 } else {
     Write-Warn "vegapunk.yaml not found in installer src/"
 }
 
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 # STEP 10: Summary and Next Steps
-# ═══════════════════════════════════════════════════════════
+# ==========================================================
 Write-Step "Installation Complete"
 
 Write-Host ""
-Write-Host "╔══════════════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║                    EDISON INSTALLED                          ║" -ForegroundColor Green
-Write-Host "╚══════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+Write-Host "================================================================" -ForegroundColor Green
+Write-Host "                    EDISON INSTALLED                            " -ForegroundColor Green
+Write-Host "================================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "  Hermes Agent:    $HERMES_HOME"
 Write-Host "  EDISON UI:       $EDISON_UI_DIR"
-Write-Host "  Punk Records:    $PUNK_RECORDS_DIR"
+Write-Host "  Messages:        $MESSAGE_DIR"
 Write-Host "  Model:           $OllamaModel"
 Write-Host "  Port Base:       $PortBase"
 Write-Host ""
@@ -291,7 +289,7 @@ Write-Host "     `$env:HERMES_HOME=`"`$env:LOCALAPPDATA\hermes`"; python serve_l
 Write-Host ""
 Write-Host "  3. Open dashboard: http://localhost:18801/hermes-ui.html"
 Write-Host ""
-Write-Host "  4. Test satellite message:"
+Write-Host "  4. Test message bridge:"
 Write-Host "     python `$env:LOCALAPPDATA\hermes\src\punk_hermes_bridge.py"
 Write-Host ""
 Write-Host "See README.md for troubleshooting and advanced configuration."

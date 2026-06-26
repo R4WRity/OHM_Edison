@@ -1,14 +1,14 @@
-# Edison — Vegapunk Satellite Installer
+# Edison — Satellite Agent Installer
 
-**One-command installer for Edison, the Vegapunk satellite agent.**
+**One-command installer for Edison, a Hermes-based AI satellite agent.**
 
-Edison is a Hermes-based AI agent configured for the Vegapunk protocol — a federated satellite mesh with decentralized memory, cross-agent communication, and distributed compute.
+Edison is an AI agent built on the Hermes framework with satellite mesh communication capabilities.
 
 ## Prerequisites
 
 Before running the installer, you must have:
 
-1. **Tailscale** — Installed and connected to the tailnet
+1. **Tailscale** — Installed and connected to your tailnet
    ```powershell
    # Download from https://tailscale.com/download
    # Sign in with your Tailscale account
@@ -19,10 +19,10 @@ Before running the installer, you must have:
    ```powershell
    # Download from https://ollama.com/download
    # Start Ollama (runs in background)
-   ollama pull kimi-k2.7-code:cloud  # Or your preferred model
+   ollama pull your-preferred-model
    ```
 
-3. **Git** — For cloning the Edison UI
+3. **Git** — For cloning the UI
    ```powershell
    git --version  # Verify installed
    ```
@@ -48,11 +48,11 @@ cd OHM_Edison
 | Component | Location | Purpose |
 |-----------|----------|---------|
 | Hermes Agent | `%LOCALAPPDATA%\hermes\` | Core AI agent framework |
-| Edison SOUL | `%LOCALAPPDATA%\hermes\SOUL.md` | Satellite identity & protocol |
-| Edison Instructions | `%LOCALAPPDATA%\hermes\EDISON_INSTRUCTIONS.md` | Framework reference |
-| EDISON UI | `%LOCALAPPDATA%\hermes\edison-ui\` | Web dashboard (port 18801) |
-| Punk Records Bridge | `%LOCALAPPDATA%\hermes\src\punk_hermes_bridge.py` | Satellite communication |
-| VSM Config | `%LOCALAPPDATA%\hermes\vegapunk.yaml` | Service orchestration |
+| Edison SOUL | `%LOCALAPPDATA%\hermes\SOUL.md` | Agent identity & protocol knowledge |
+| Edison Instructions | `%LOCALAPPDATA%\hermes\EDISON_INSTRUCTIONS.md` | Protocol reference |
+| Web UI | `%LOCALAPPDATA%\hermes\edison-ui\` | Web dashboard |
+| Satellite Bridge | `%LOCALAPPDATA%\hermes\src\punk_hermes_bridge.py` | Inter-agent communication |
+| Service Config | `%LOCALAPPDATA%\hermes\vegapunk.yaml` | Service orchestration |
 
 ## Post-Install
 
@@ -60,53 +60,31 @@ After installation completes:
 
 1. **Access the dashboard:**
    ```
-   http://localhost:18801/hermes-ui.html
+   http://localhost:18801
    ```
 
-2. **Verify satellite connectivity:**
-   ```powershell
-   cd %LOCALAPPDATA%\hermes\src
-   python punk_hermes_bridge.py
-   ```
-
-3. **Check Punk Records inbox:**
-   ```powershell
-   # Messages from other satellites appear here:
-   %LOCALAPPDATA%\hermes\punk-records\inbox\
-   ```
-
-4. **Start services manually (if needed):**
+2. **Start services manually (if needed):**
    ```powershell
    # Hermes gateway (API server)
    hermes gateway run
    
-   # EDISON UI
+   # Web UI
    cd %LOCALAPPDATA%\hermes\edison-ui
    python serve_lite.py --port 18801
    ```
-
-## Architecture
-
-```
-User → EDISON UI (port 18801) → Hermes API (port 8642) → Ollama (port 11434)
-                                   ↓
-                            Punk Records Bridge → Syncthing → Satellite Mesh
-                                   ↓
-                            Local Neo4j KG (port 18803)
-```
 
 ## Port Allocation
 
 | Port | Service |
 |------|---------|
-| 18800 | Gateway (Hermes API Server) |
-| 18801 | EDISON UI (Web Dashboard) |
+| 18800 | Gateway (API Server) |
+| 18801 | Web Dashboard |
 | 18802 | Voice Interface (future) |
 | 18803 | Neo4j HTTP |
 | 18804 | Neo4j Bolt |
-| 18805 | VSM (VegaPunk Service Manager) |
-| 18806 | Control Tower |
-| 18807 | Punk Records Local Bridge |
+| 18805 | Service Manager |
+| 18806 | Monitoring |
+| 18807 | Satellite Bridge |
 | 18808-18809 | Reserved |
 
 ## Troubleshooting
@@ -123,10 +101,10 @@ Use Hermes venv Python, not system Python:
 ### Ollama not responding
 Verify Ollama is running:
 ```powershell
-curl http://localhost:11434/api/tags
+Invoke-RestMethod -Uri "http://localhost:11434/api/tags"
 ```
 
-### Punk Records not syncing
+### Satellite communication not syncing
 Verify Syncthing is running and folders are shared:
 ```powershell
 # Syncthing web UI
@@ -139,10 +117,8 @@ See [GAPS.md](GAPS.md) for known limitations and future roadmap.
 
 ## Support
 
-- **Discord:** Ohm's Den — #sigma-chat
-- **Punk Records:** Send status message to "ohm" satellite
 - **GitHub Issues:** https://github.com/R4WRity/OHM_Edison/issues
 
 ---
 
-**Vegapunk Protocol v1 | Project Prometheus**
+**Protocol: Satellite Mesh v1**
