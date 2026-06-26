@@ -1,0 +1,80 @@
+settings:
+  name: edison
+  check_interval_seconds: 30
+  startup_delay_between_services: 3
+  max_restart_attempts: 3
+  restart_backoff_seconds:
+  - 5
+  - 15
+  - 60
+profiles:
+  default:
+    services:
+    - gateway
+    - cockpit
+    - vsm
+    - punk_records
+  full:
+    services:
+    - gateway
+    - cockpit
+    - voice
+    - vsm
+    - control_tower
+    - punk_records
+services:
+  gateway:
+    type: executable
+    description: Hermes Gateway API Server
+    port: 18800
+    auto_restart: true
+    depends_on: []
+    health_check:
+      url: http://localhost:18800/health
+      timeout: 5
+  cockpit:
+    type: executable
+    description: EDISON UI Web Dashboard
+    port: 18801
+    auto_restart: true
+    depends_on:
+    - gateway
+    health_check:
+      url: http://localhost:18801/hermes-ui.html
+      timeout: 5
+  voice:
+    type: executable
+    description: Voice Interface
+    port: 18802
+    auto_restart: false
+    depends_on:
+    - gateway
+    health_check:
+      url: http://localhost:18802/health
+      timeout: 5
+  vsm:
+    type: python_script
+    description: VegaPunk Service Manager
+    port: 18805
+    auto_restart: true
+    depends_on: []
+    health_check: null
+  control_tower:
+    type: python_script
+    description: Control Tower Monitoring
+    port: 18806
+    auto_restart: true
+    depends_on:
+    - gateway
+    health_check:
+      url: http://localhost:18806/api/status
+      timeout: 5
+  punk_records:
+    type: python_script
+    description: Punk Records Local Bridge
+    port: 18807
+    auto_restart: true
+    depends_on: []
+    health_check:
+      url: http://localhost:18807/health
+      timeout: 3
